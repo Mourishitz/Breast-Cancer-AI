@@ -1,3 +1,4 @@
+import keras.optimizers
 import pandas as pd
 from keras.layers import Dense
 from keras.models import Sequential
@@ -23,6 +24,15 @@ classifier.add(
     )
 )
 
+# hidden layer
+classifier.add(
+    Dense(
+        units=16,
+        activation='relu',
+        kernel_initializer='random_uniform'
+    )
+)
+
 # out layer
 classifier.add(
     Dense(
@@ -31,8 +41,14 @@ classifier.add(
     )
 )
 
+optimizer = keras.optimizers.Adam(
+    lr=0.001,
+    decay=0.0001,
+    clipvalue=0.5
+)
+
 classifier.compile(
-    optimizer='adam',
+    optimizer=optimizer,
     loss='binary_crossentropy',
     metrics=[
         'binary_accuracy'
@@ -46,10 +62,12 @@ classifier.fit(
     epochs=100
 )
 
+weight0 = classifier.layers[0].get_weights()
+
 previsions = classifier.predict(test_prevision)
 previsions = (previsions > 0.5)
 
 accuracy = accuracy_score(test_class, previsions)
 matrix = confusion_matrix(test_class, previsions)
 result = classifier.evaluate(test_prevision, test_class)
-print(result)
+print(len(weight0))
